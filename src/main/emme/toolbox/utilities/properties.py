@@ -75,6 +75,7 @@ class PropertiesSetter(object):
     skipTripTableCreation_3 = _m.Attribute(bool)
 
     skipFinalHighwayAssignment = _m.Attribute(bool)
+    skipFinalHighwayAssignmentStochastic = _m.Attribute(bool)
     skipFinalTransitAssignment = _m.Attribute(bool)
     skipVisualizer = _m.Attribute(bool)
     skipDataExport = _m.Attribute(bool)
@@ -132,7 +133,7 @@ class PropertiesSetter(object):
             "startFromIteration", "skipInitialization", "deleteAllMatrices", "skipCopyWarmupTripTables", 
             "skipCopyBikeLogsum", "skipCopyWalkImpedance", "skipWalkLogsums", "skipBikeLogsums", "skipBuildNetwork", 
             "skipHighwayAssignment", "skipTransitSkimming", "skipTransponderExport", "skipCoreABM", "skipOtherSimulateModel", "skipMAASModel","skipCTM", 
-            "skipEI", "skipExternalExternal", "skipTruck", "skipTripTableCreation", "skipFinalHighwayAssignment", 
+            "skipEI", "skipExternalExternal", "skipTruck", "skipTripTableCreation", "skipFinalHighwayAssignment", 'skipFinalHighwayAssignmentStochastic', 
             "skipFinalTransitAssignment", "skipVisualizer", "skipDataExport", "skipDataLoadRequest", 
             "skipDeleteIntermediateFiles")
         self._properties = None
@@ -195,6 +196,7 @@ class PropertiesSetter(object):
         ]
         skip_final_items = [
             ("skipFinalHighwayAssignment",  "Skip final highway assignments"),
+            ("skipFinalHighwayAssignmentStochastic",  "&nbsp;&nbsp;&nbsp;&nbsp;Skip stochastic assignment"),
             ("skipFinalTransitAssignment",  "Skip final transit assignments"),
             ("skipVisualizer",              "Skip running visualizer"),
             ("skipDataExport",              "Skip data export"),
@@ -325,6 +327,7 @@ class PropertiesSetter(object):
         self.skipTripTableCreation = props.get("RunModel.skipTripTableCreation", [False, False, False])
 
         self.skipFinalHighwayAssignment = props.get("RunModel.skipFinalHighwayAssignment", False)
+        self.skipFinalHighwayAssignmentStochastic = props.get("RunModel.skipFinalHighwayAssignmentStochastic", True)
         self.skipFinalTransitAssignment = props.get("RunModel.skipFinalTransitAssignment", False) 
         self.skipVisualizer = props.get("RunModel.skipVisualizer", False)
         self.skipDataExport = props.get("RunModel.skipDataExport", False)
@@ -361,6 +364,7 @@ class PropertiesSetter(object):
         props["RunModel.skipTripTableCreation"] = self.skipTripTableCreation
 
         props["RunModel.skipFinalHighwayAssignment"] = self.skipFinalHighwayAssignment
+        props["RunModel.skipFinalHighwayAssignmentStochastic"] = self.skipFinalHighwayAssignmentStochastic
         props["RunModel.skipFinalTransitAssignment"] = self.skipFinalTransitAssignment
         props["RunModel.skipVisualizer"] = self.skipVisualizer
         props["RunModel.skipDataExport"] = self.skipDataExport
@@ -527,11 +531,11 @@ class Properties(object):
             reader = csv.DictReader(f)
             properties_by_year = {}
             for row in reader:
-                year = int(row.pop("year"))
+                year = str(row.pop("year"))
                 properties_by_year[year] = row
-        year_properties = properties_by_year.get(self["scenarioYear"])
+        year_properties = properties_by_year.get(str(self["scenarioBuild"]))
         if year_properties is None:
-            raise Exception("Row with year %s not found in %s" % (self["scenarioYear"], file_path))
+            raise Exception("Row with year %s not found in %s" % (self["scenarioBuild"], file_path))
         self.update(year_properties)
 
     def __setitem__(self, key, item): 
